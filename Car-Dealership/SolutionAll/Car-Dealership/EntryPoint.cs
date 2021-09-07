@@ -1,424 +1,717 @@
 ﻿using System;
-using System.Collections.Generic;
-using Models.Vehicles;
 using Models;
-using Models.Enums;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace Car_Dealership
+
+namespace CarDealership
 {
     class EntryPoint
     {
         static void Main(string[] args)
         {
-            #region InStock
-            List<Car> CarListInStock = new List<Car>();
-            CarListInStock.Add(new Car("Gasoline", "BMW", "M3", 30000, "Car"));
-            CarListInStock.Add(new Car("Diesel", "Audi", "A3", 35000, "Car"));
-            CarListInStock.Add(new Car("Electricity", "Tesla", "Modes-S", 45000, "Car"));
-
-            List<Van> VanListInStock = new List<Van>();
-            VanListInStock.Add(new Van("Small", "Citroen", "Relay", 25000, "Van"));
-            VanListInStock.Add(new Van("Medium", "Peugeot", "Boxer", 30000, "Van"));
-            VanListInStock.Add(new Van("Large", "Fiat", "Ducato", 35000, "Van"));
-
-            List<Truck> TruckListInStock = new List<Truck>();
-            TruckListInStock.Add(new Truck("Volvo", "FH", 35000, "Truck", "No Trailer"));
-            TruckListInStock.Add(new Truck("Scania", "S 730", 35000, "Truck", "One Trailer"));
-            TruckListInStock.Add(new Truck("Man", "TGX", 50000, "Truck", "Two Trailers"));
-            #endregion
-
-            #region AccountLists & VehicleLists
-            Catalog CatalogList = new Catalog(CarListInStock, VanListInStock, TruckListInStock, true);
-
-            List<Order> OrdersList = new List<Order>();
-            OrdersList.Add(new Order("Citroen", "C4", 20000, "Car"));
-            OrdersList.Add(new Order("Fiat", "Doblo", 25000, "Van"));
-            OrdersList.Add(new Order("Mercedes-Benz", "Actros", 75000, "Truck"));
-
-            List<Customer> CustomerList = new List<Customer>();
-            CustomerList.Add(new Customer(1, "Tod", "Smith", "TS", "111", Enum_Role.Customer));
-            CustomerList.Add(new Customer(2, "Will", "Johnson", "WJ", "222", Enum_Role.Customer));
-            CustomerList.Add(new Customer(3, "Bill", "Brown", "BB", "333", Enum_Role.Customer));
-
-            List<SalesEmployee> SalesEployeeList = new List<SalesEmployee>();
-            SalesEployeeList.Add(new SalesEmployee(4, "John", "Jones", "JJ", "444", Enum_Role.SalesEmployee));
-            SalesEployeeList.Add(new SalesEmployee(5, "Sarah", "Johnson", "SJ", "555", Enum_Role.SalesEmployee));
-            SalesEployeeList.Add(new SalesEmployee(6, "Nancy", "Brown", "NB", "666", Enum_Role.SalesEmployee));
-
-            List<ProcurementEmployee> ProcurementEmployeesList = new List<ProcurementEmployee>();
-            ProcurementEmployeesList.Add(new ProcurementEmployee(7, "Tom", "Moore", "TM", "777", Enum_Role.ProcurementEmployee, OrdersList, CatalogList));
-            ProcurementEmployeesList.Add(new ProcurementEmployee(8, "Bobby", "Lee", "BL", "888", Enum_Role.ProcurementEmployee, OrdersList, CatalogList));
-            ProcurementEmployeesList.Add(new ProcurementEmployee(9, "Susan", "Lewis", "SL", "999", Enum_Role.ProcurementEmployee, OrdersList, CatalogList));
-
-            List<PendingOrder> PendingOrderList = new List<PendingOrder>();
-            AccountsCollection accountsCollection = new AccountsCollection(CustomerList, SalesEployeeList, ProcurementEmployeesList);
-            #endregion
-
             while (true)
             {
-
-                Console.WriteLine("Please enter user name");
-                string userNameInput = Console.ReadLine();
-
-                Console.WriteLine("Please enter password");
-                string passwordInput = Console.ReadLine();
-
-                Customer LoginUser = CustomerList.FirstOrDefault(x => x.Validate(userNameInput, passwordInput) != null);
-                SalesEmployee LoginSalesEmployee = SalesEployeeList.FirstOrDefault(x => x.Validate(userNameInput, passwordInput) != null);
-                //AccountsCollection.Validate(accountsCollection, userNameInput, passwordInput);
-
-                if (LoginUser.Role == Enum_Role.SalesEmployee)
+                Console.Clear();
+                Console.WriteLine("1.Login\n2.New custumer <- Register here\n3.Exit");
+                string loginRegister = Console.ReadLine();
+                bool loginRegisterParsed = int.TryParse(loginRegister, out int loginRegisterNum);
+                if (!loginRegisterParsed || loginRegisterNum > 3 || loginRegisterNum < 1)
                 {
-                    Catalog.SeeTheCatalog(CatalogList);
-                    Console.WriteLine("To buy a car enter 1.");
-                    Console.WriteLine("To buy a van enter 2.");
-                    Console.WriteLine("To buy a truck enter 3.");
+                    Console.Clear();
+                    Console.WriteLine("Wrong input!! Please try again");
+                    Console.ReadLine();
+                    continue;
+                }
+                if (loginRegisterNum == 1)
+                {
+                    Console.Clear();
+                    User loggedInUser = Login();
 
-                    int numberInput = int.Parse(Console.ReadLine());
-
-                    switch (numberInput)
+                    if (loggedInUser.Role == Enums.RoleEnum.Client)
                     {
-                        #region CarInputs
-                        case 1:
-
-                            Console.WriteLine("You can choose a car from the ones in the catalog, or we can place an order.");
-                            Console.WriteLine("Please choose the car manufacturer.");
-                            string carManufacturerInput = Console.ReadLine();
-                            Console.WriteLine("Please choose the model of the car.");
-                            string carModelInput = Console.ReadLine();
-                            Console.WriteLine("Please choose the type of fuel for the car.");
-                            string carFuelInput = Console.ReadLine();
-                            Console.WriteLine("Please type the price that you think the car is.");
-                            decimal carPriceInput = decimal.Parse(Console.ReadLine());
-
-                            foreach (var car in CarListInStock)
-                            {
-                                if (car.Manufacturer != carManufacturerInput && car.Model != carModelInput && car.TypeOfFuel != carFuelInput && car.Price != carPriceInput)
-                                {
-
-                                    Console.ForegroundColor = ConsoleColor.Red;
-                                    Console.WriteLine(new string('-', 90));
-                                    Console.WriteLine("We need to place an order the car is not in the inventory!!!");
-                                    Console.WriteLine(new string('-', 90));
-                                    Console.ResetColor();
-
-                                    Console.WriteLine("Please choose the car manufacturer.");
-                                    string carManufacturerInput1 = Console.ReadLine();
-                                    Console.WriteLine("Please choose the model of the car.");
-                                    string carModelInput1 = Console.ReadLine();
-                                    Console.WriteLine("Please choose the type of fuel for the car.");
-                                    string carFuelInput1 = Console.ReadLine();
-
-                                    if (carFuelInput1 == "Gasoline")
-                                    {
-                                        Console.WriteLine("Please type the price that you think the car is.");
-                                        decimal carPriceInput1 = decimal.Parse(Console.ReadLine());
-
-                                        PendingOrderList.Add(new PendingOrder(carManufacturerInput1, carModelInput1, carPriceInput1, carFuelInput1));
-
-                                        Console.ForegroundColor = ConsoleColor.Green;
-                                        Console.WriteLine(new string('-', 90));
-                                        Console.WriteLine("Thank you very much your order has been received, and is Pending for Approval.");
-                                        Console.WriteLine(new string('-', 90));
-                                        Console.ResetColor();
-
-                                        foreach (var item in PendingOrderList)
-                                        {
-                                            Console.WriteLine($"Here is your order \nManufacturer : {item.Manufacturer} \nModel: {item.Model} \nPrice: ${item.Price} \nType of fuel: {item.Type}");
-                                        }
-                                    }
-                                    else if (carFuelInput1 == "Diesel")
-                                    {
-                                        Console.WriteLine("Please type the price that you think the car is.");
-                                        decimal carPriceInput1 = decimal.Parse(Console.ReadLine());
-
-                                        decimal con = carPriceInput1 % 100;
-                                        decimal per = con * 5;
-                                        decimal sumPrice = per + carPriceInput1;
-
-                                        Console.ForegroundColor = ConsoleColor.Magenta;
-                                        Console.WriteLine($"There is a %5 increase on the price for an Diesel car!");
-                                        Console.ResetColor();
-
-                                        PendingOrderList.Add(new PendingOrder(carManufacturerInput1, carModelInput1, sumPrice, carFuelInput1));
-
-                                        Console.ForegroundColor = ConsoleColor.Green;
-                                        Console.WriteLine(new string('-', 90));
-                                        Console.WriteLine("Thank you very much your order has been received, and is Pending for Approval.");
-                                        Console.WriteLine(new string('-', 90));
-                                        Console.ResetColor();
-
-                                        foreach (var item in PendingOrderList)
-                                        {
-                                            Console.WriteLine($"Here is your order \nManufacturer : {item.Manufacturer} \nModel: {item.Model} \nPrice: ${item.Price} \nType of fuel: {item.Type}");
-                                        }
-                                    }
-
-                                    else if (carFuelInput1 == "Electric")
-                                    {
-
-                                        Console.WriteLine("Please type the price that you think the car is.");
-                                        decimal carPriceInput1 = decimal.Parse(Console.ReadLine());
-
-                                        decimal con = carPriceInput1 % 100;
-                                        decimal per = con * 15;
-                                        decimal sumPrice = per + carPriceInput1;
-
-                                        Console.ForegroundColor = ConsoleColor.Magenta;
-                                        Console.WriteLine($"There is a %15 increase on the price for an Electric car!");
-                                        Console.ResetColor();
-
-                                        PendingOrderList.Add(new PendingOrder(carManufacturerInput1, carModelInput1, sumPrice, carFuelInput1));
-
-                                        Console.ForegroundColor = ConsoleColor.Green;
-                                        Console.WriteLine(new string('-', 90));
-                                        Console.WriteLine("Thank you very much your order has been received, and is Pending for Approval.");
-                                        Console.WriteLine(new string('-', 90));
-                                        Console.ResetColor();
-
-                                        foreach (var item in PendingOrderList)
-                                        {
-                                            Console.WriteLine($"Here is your order \nManufacturer : {item.Manufacturer} \nModel: {item.Model} \nPrice: ${item.Price} \nType of fuel: {item.Type}");
-                                        }
-                                    }
-                                }
-
-                                else if (car.Manufacturer == carManufacturerInput && car.Model == carModelInput && car.TypeOfFuel == carFuelInput && car.Price == carPriceInput)
-                                {
-                                    PendingOrderList.Add(new PendingOrder(carManufacturerInput, carModelInput, carPriceInput, carFuelInput));
-
-                                    Console.ForegroundColor = ConsoleColor.Green;
-                                    Console.WriteLine(new string('-', 90));
-                                    Console.WriteLine("Thank you very much your order has been received, and is Pending for Approval.");
-                                    Console.WriteLine(new string('-', 90));
-                                    Console.ResetColor();
-
-                                    foreach (var item in PendingOrderList)
-                                    {
-                                        Console.WriteLine($"Here is your order \nManufacturer : {item.Manufacturer} \nModel: {item.Model} \nPrice: {item.Price} \nType of fuel: {item.Type}");
-                                    }
-                                }
-                            }
-
-                            break;
-                        #endregion
-
-                        #region VanInputs
-                        case 2:
-
-                            Console.WriteLine("You can choose a van from the ones in the catalog, or you can place an order.");
-                            Console.WriteLine("Please choose the van manufacturer.");
-                            string vanManufacturerInput = Console.ReadLine();
-                            Console.WriteLine("Please choose the model of the van.");
-                            string vanModelInput = Console.ReadLine();
-                            Console.WriteLine("Please type the price that you think the van is.");
-                            decimal vanPriceInput = decimal.Parse(Console.ReadLine());
-                            Console.WriteLine("Please choose the payload of the van.");
-                            string vanPayloadInput = Console.ReadLine();
-
-                            if (CatalogList.Vans.Where(x => x.Manufacturer == vanManufacturerInput && x.Model == vanModelInput && x.Price == vanPriceInput && x.Payload == vanPayloadInput) != null)
-                            {
-                                PendingOrderList.Add(new PendingOrder(vanManufacturerInput, vanModelInput, vanPriceInput, vanPayloadInput));
-
-                                Console.ForegroundColor = ConsoleColor.Green;
-                                Console.WriteLine(new string('-', 90));
-                                Console.WriteLine("Thank you very much your order has been received, and is Pending for Approval.");
-                                Console.WriteLine(new string('-', 90));
-                                Console.ResetColor();
-
-                                foreach (var item in PendingOrderList)
-                                {
-                                    Console.WriteLine($"Here is your order \nManufacturer : {item.Manufacturer} \nModel: {item.Model} \nPrice: {item.Price} \nPayload : {item.Type}");
-                                }
-                            }
-
-                            else if (CatalogList.Vans.Where(x => x.Manufacturer != vanManufacturerInput || x.Model != vanModelInput || x.Price != vanPriceInput || x.Payload != vanPayloadInput) != null)
-                            {
-                                Console.ForegroundColor = ConsoleColor.Red;
-                                Console.WriteLine(new string('-', 90));
-                                Console.WriteLine("We need to place an order the car is not in the inventory!!!");
-                                Console.WriteLine(new string('-', 90));
-                                Console.ResetColor();
-
-                                Console.WriteLine("Please choose the manufacturer of the van.");
-                                string vanManufacturerInput1 = Console.ReadLine();
-                                Console.WriteLine("Please choose the model of the van.");
-                                string vanModelInput1 = Console.ReadLine();
-                                Console.WriteLine("Please type the price that you think the van is.");
-                                decimal vanPriceInput1 = decimal.Parse(Console.ReadLine());
-                                Console.WriteLine("Please choose the payload of the van.");
-                                string vanPayloadInput1 = Console.ReadLine();
-
-                                PendingOrderList.Add(new PendingOrder(vanManufacturerInput1, vanModelInput1, vanPriceInput1, vanPayloadInput1));
-
-                                Console.ForegroundColor = ConsoleColor.Green;
-                                Console.WriteLine(new string('-', 90));
-                                Console.WriteLine("Thank you very much your order has been received, and is Pending for Approval.");
-                                Console.WriteLine(new string('-', 90));
-                                Console.ResetColor();
-
-                                foreach (var item in PendingOrderList)
-                                {
-                                    Console.WriteLine($"Here is your order \nManufacturer : {item.Manufacturer} \nModel: {item.Model} \nPrice: {item.Price} \nPayload : {item.Type}");
-                                }
-                            }
-
-                            break;
-                        #endregion
-
-                        #region TruckInputs
-                        case 3:
-
-                            Console.WriteLine("You can choose a truck from the ones in the catalog, or you can place an order.");
-                            Console.WriteLine("Please choose the truck manufacturer.");
-                            string truckManufacturerInput = Console.ReadLine();
-                            Console.WriteLine("Please choose the model of the truck.");
-                            string truckModelInput = Console.ReadLine();
-                            Console.WriteLine("Please type the price the price of the truck.");
-                            decimal truckPriceInput = decimal.Parse(Console.ReadLine());
-                            Console.WriteLine("Please choose the number of trailers for the truck.\nPlease note that if you choose No Trailer the price will be standard.\nIf You choose One Trailer the price is plus $3000 \nIf you choose Two Trailers you get a 10% discount on the second one.");
-                            string truckTrailerInput = Console.ReadLine();
-
-                            if (CatalogList.Trucks.Where(x => x.Manufacturer == truckManufacturerInput && x.Model == truckModelInput && x.Price == truckPriceInput && x.NumberOfTrailers == truckTrailerInput) != null)
-                            {
-                                PendingOrderList.Add(new PendingOrder(truckManufacturerInput, truckModelInput, truckPriceInput, truckTrailerInput));
-
-                                Console.ForegroundColor = ConsoleColor.Green;
-                                Console.WriteLine(new string('-', 90));
-                                Console.WriteLine("Thank you very much your order has been received, and is Pending for Approval.");
-                                Console.WriteLine(new string('-', 90));
-                                Console.ResetColor();
-
-                                foreach (var item in PendingOrderList)
-                                {
-                                    Console.WriteLine($"Here is your order \nManufacturer : {item.Manufacturer} \nModel: {item.Model} \nPrice: ${item.Price} \nPayload : {item.Type}");
-                                }
-                            }
-
-                            if (CatalogList.Trucks.Where(x => x.Manufacturer != truckManufacturerInput && x.Model != truckModelInput && x.Price != truckPriceInput && x.NumberOfTrailers != truckTrailerInput) != null)
-                            {
-                                Console.ForegroundColor = ConsoleColor.Red;
-                                Console.WriteLine(new string('-', 90));
-                                Console.WriteLine("We need to place an order the truck is not in the inventory!!!");
-                                Console.WriteLine(new string('-', 90));
-                                Console.ResetColor();
-
-                                Console.WriteLine("Please choose the manufacturer of the truck.");
-                                string truckManufacturerInput1 = Console.ReadLine();
-                                Console.WriteLine("Please choose the model of the truck.");
-                                string truckModelInput1 = Console.ReadLine();
-                                Console.WriteLine("Please type the price for the truck.");
-                                decimal truckPriceInput1 = decimal.Parse(Console.ReadLine());
-                                Console.WriteLine("Please choose the number of trailers.");
-                                string truckTrailerInput1 = Console.ReadLine();
-
-                                if (truckTrailerInput1 == "No Trailer")
-                                {
-                                    PendingOrderList.Add(new PendingOrder(truckManufacturerInput1, truckModelInput1, truckPriceInput1, truckTrailerInput1));
-
-                                    Console.ForegroundColor = ConsoleColor.Green;
-                                    Console.WriteLine(new string('-', 90));
-                                    Console.WriteLine("Thank you very much your order has been received, and is Pending for Approval.");
-                                    Console.WriteLine(new string('-', 90));
-                                    Console.ResetColor();
-
-                                    foreach (var item in PendingOrderList)
-                                    {
-                                        Console.WriteLine($"Here is your order \nManufacturer : {item.Manufacturer} \nModel: {item.Model} \nPrice: ${item.Price} \nPayload : {item.Type}");
-                                    }
-                                }
-                                else if (truckTrailerInput1 == "One Trailer")
-                                {
-                                    int oneTrailer = 3000;
-                                    decimal priceWithOneTrailer = truckPriceInput1 + oneTrailer;
-
-                                    Console.ForegroundColor = ConsoleColor.Magenta;
-                                    Console.WriteLine($"There is a $3000 increase on the price for One Trailer!");
-                                    Console.ResetColor();
-
-                                    PendingOrderList.Add(new PendingOrder(truckManufacturerInput1, truckModelInput1, priceWithOneTrailer, truckTrailerInput1));
-
-                                    Console.ForegroundColor = ConsoleColor.Green;
-                                    Console.WriteLine(new string('-', 90));
-                                    Console.WriteLine("Thank you very much your order has been received, and is Pending for Approval.");
-                                    Console.WriteLine(new string('-', 90));
-                                    Console.ResetColor();
-
-                                    foreach (var item in PendingOrderList)
-                                    {
-                                        Console.WriteLine($"Here is your order \nManufacturer : {item.Manufacturer} \nModel: {item.Model} \nPrice: ${item.Price} \nPayload : {item.Type}");
-                                    }
-                                }
-                                else if (truckTrailerInput1 == "Two Trailers")
-                                {
-                                    int oneTrailer = 3000;
-
-                                    decimal priceWithOneTrailer = truckPriceInput1 + oneTrailer;
-                                    decimal temp = (oneTrailer % 100) * 10;
-                                    decimal discount = oneTrailer - temp;
-                                    decimal priceWithTwoTrailers = priceWithOneTrailer + discount;
-
-                                    Console.ForegroundColor = ConsoleColor.Magenta;
-                                    Console.WriteLine($"There is a %10 discount for the second trailer!");
-                                    Console.ResetColor();
-
-                                    PendingOrderList.Add(new PendingOrder(truckManufacturerInput1, truckModelInput1, priceWithTwoTrailers, truckTrailerInput1));
-
-                                    Console.ForegroundColor = ConsoleColor.Green;
-                                    Console.WriteLine(new string('-', 90));
-                                    Console.WriteLine("Thank you very much your order has been received, and is Pending for Approval.");
-                                    Console.WriteLine(new string('-', 90));
-                                    Console.ResetColor();
-
-                                    foreach (var item in PendingOrderList)
-                                    {
-                                        Console.WriteLine($"Here is your order \nManufacturer : {item.Manufacturer} \nModel: {item.Model} \nPrice: ${item.Price} \nPayload : {item.Type}");
-                                    }
-                                }
-                            }
-                            break;
-                            #endregion
+                        ClientMenu((Client)loggedInUser);
+                    }
+                    else if (loggedInUser.Role == Enums.RoleEnum.Sale)
+                    {
+                        SaleMenu((Sale)loggedInUser);
+                    }
+                    else if (loggedInUser.Role == Enums.RoleEnum.Dealer)
+                    {
+                        DealerMenu((Dealer)loggedInUser);
                     }
                 }
-
-                if (LoginSalesEmployee.Role == Enum_Role.SalesEmployee)
+                else if (loginRegisterNum == 2)
                 {
-                    //SalesEmployee.SeeTheCustumerList(CustomerList);
+                    Console.Clear();
+                    User newClient = Register();
+                    DbUsers.Users.Add(newClient);
+                    continue;
+                }
+                else if (loginRegisterNum == 3) return;
+            }
 
-                    Console.WriteLine("To view the list of pending orders press 1.");
-                    int numberInput = int.Parse(Console.ReadLine());
-
-                    switch (numberInput)
-                    {
-                        case 1:
-                            SalesEmployee.SeePendingOrderList(PendingOrderList);
-
-                            Console.WriteLine(new string('-', 90));
-                            Console.WriteLine("To Decline the order please write Decline, and then please write the type of the vehicle, and all the characteristics.");
-                            Console.WriteLine(new string('-', 90));
-                            Console.WriteLine("To Approve the order please write Approve and the order will be moved to the Order List.");
-                            Console.WriteLine(new string('-', 90));
-
-                            string statusInput = Console.ReadLine();
-
-                            if (statusInput == "Decline")
-                            {
-                                Console.WriteLine($"Please Write the type of the vehicle.");
-                                string typeInput = Console.ReadLine();
-                            }
-
-                            break;
-                    }
+        }
+        static Client Register()
+        {
+            while (true)
+            {
+                Console.Write("Enter your first name: ");
+                string newClientFirstName = Console.ReadLine();
+                if (newClientFirstName.Length < 3)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Name too short\nPlease use your real name");
+                    Console.ReadLine();
+                    continue;
                 }
 
-                break;
+                Console.Write("Enter your last name: ");
+                string newClientLastName = Console.ReadLine();
+                if (newClientLastName.Length < 3)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Last name too short\nPlease use your real surname");
+                    Console.ReadLine();
+                    continue;
+                }
+                Console.Write("Enter your email: ");
+                string newClientEmail = Console.ReadLine();
+                if (!newClientEmail.Contains("@") || !newClientEmail.Contains(".com"))
+                {
+                    Console.Clear();
+                    Console.WriteLine($@"Wrong email input you're missing @ or "".com"" ");
+                    Console.ReadLine();
+                    continue;
+                }
+                Console.Write("Enter password: ");
+                string newClientPassword = Console.ReadLine();
+                if (newClientPassword.Length < 3)
+                {
+                    Console.Clear();
+                    Console.WriteLine($@"Password too short Please use more than 3 characters");
+                    Console.ReadLine();
+                    continue;
+                }
+                Console.Clear();
+                Console.WriteLine("Account successfuly created");
+                Console.ReadLine();
+                Client newClient = new Client(newClientFirstName, newClientLastName, newClientEmail, newClientPassword, Enums.RoleEnum.Client, 10000);
+                return newClient;
+            }
+        }
+        static User Login()
+        {
+            while (true)
+            {
+                Console.Write("Please enter your email: ");
+                string email = Console.ReadLine();
+                Console.Write("Please enter your password: ");
+                string pass = Console.ReadLine();
+
+                if (email == "" || pass == "")
+                {
+                    Console.Clear();
+                    Console.WriteLine("You must enter email and password\n");
+                    Console.ReadLine();
+                    continue;
+                }
+
+                User loggedUser = DbUsers.Users.FirstOrDefault(x => x.Mail == email);
+
+                if (loggedUser == null)
+                {
+                    Console.Clear();
+                    Console.WriteLine($@"Sorry email ""{email}"" not exist{"\n"}");
+                    Console.ReadLine();
+                    continue;
+                }
+
+                if (!loggedUser.PasswordCheck(pass))
+                {
+                    Console.Clear();
+                    Console.WriteLine("Wrong password please try again\n");
+                    Console.ReadLine();
+                    continue;
+                }
+
+                else
+                {
+                    Console.Clear();
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"Welcome {loggedUser.FullName}\n\n");
+                    Console.ResetColor();
+                }
+
+                return loggedUser;
+            }
+        }
+        static void ClientMenu(Client client)
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine($"Welcome to CarShop {client.FullName}\n");
+                Console.WriteLine($"1.View all vehicles\n2.Log out");
+                string clientInput = Console.ReadLine();
+                bool clientInputParse = int.TryParse(clientInput, out int clientInputNum);
+                if (!clientInputParse || clientInputNum > 2 || clientInputNum < 1)
+                {
+                    Console.WriteLine("Wrong input");
+                    Console.ReadLine();
+                    continue;
+                }
+                if (clientInputNum == 1)
+                {
+                    Console.Clear();
+                    foreach (Vehicle vehicle in DbVehicles.Vehicles)
+                    {
+                        if (vehicle.Status == Enums.VehicleStatusEnum.Reserved)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine(vehicle.VehicleInfo());
+                            Console.ResetColor();
+                        }
+                        else
+                        {
+                            Console.WriteLine(vehicle.VehicleInfo());
+                        }
+
+                    }
+                    Console.WriteLine($"1.Select Vehicle\n2.Log out");
+                    string clientInputMenu1 = Console.ReadLine();
+                    bool clientInputMenuParsed = int.TryParse(clientInputMenu1, out int clientInputMenuNum);
+                    if (!clientInputMenuParsed || clientInputMenuNum > 2 || clientInputMenuNum < 1)
+                    {
+                        Console.WriteLine("Wrong input");
+                        Console.ReadLine();
+                        continue;
+                    }
+                    if (clientInputMenuNum == 1)
+                    {
+                        Console.Write("Please enter vehicle ID number : ");
+                        string vehicleId = Console.ReadLine();
+                        bool vehicleIdParsed = int.TryParse(vehicleId, out int vehicleIdNum);
+                        if (!vehicleIdParsed)
+                        {
+                            Console.WriteLine("Wrong input!!!");
+                            Console.ReadLine();
+                            continue;
+                        }
+                        SelectVehicle(vehicleIdNum);
+
+                    }
+                    else if (clientInputMenuNum == 2)
+                        return;
+                }
+                else if (clientInputNum == 2)
+                    return;
+            }
+        }
+        static void SelectVehicle(int id)
+        {
+            while (true)
+            {
+                Vehicle selectedVehicle = DbVehicles.Vehicles.FirstOrDefault(x => x.Id == id);
+                if (selectedVehicle == null)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Vehicle not found");
+                    Console.ResetColor();
+                    Console.ReadLine();
+                    break;
+                }
+                if (selectedVehicle.Status == Enums.VehicleStatusEnum.Reserved || selectedVehicle.Status == Enums.VehicleStatusEnum.Sold)
+                {
+                    Console.Clear();
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Vehicle not available\nPlease choose other vehicle");
+                    Console.ResetColor();
+                    Console.ReadLine();
+                    break;
+                }
+                Car selectedCar = new Car();
+                Truck selectedTruck = new Truck();
+                Van selectedVan = new Van();
+
+                if (selectedVehicle.Type == "Car")
+                {
+                    selectedCar = (Car)selectedVehicle;
+                    Console.Clear();
+                    Console.WriteLine(selectedCar.VehicleInfo());
+                    Console.WriteLine($"1.Order base Vehicle \n2.Add Extras\n3.Return");
+                    string selectedCarClientInput = Console.ReadLine();
+                    bool clientInputParsed = int.TryParse(selectedCarClientInput, out int selectedCarInputNum);
+                    if (!clientInputParsed || selectedCarInputNum > 3 || selectedCarInputNum < 1)
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Wrong input!!!");
+                        Console.ReadLine();
+                        continue;
+                    }
+                    if (selectedCarInputNum == 1)
+                    {
+                        Console.Clear();
+                        selectedCar.Status = Enums.VehicleStatusEnum.Reserved;
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("Vehicle successfuly reserved");
+                        Console.ResetColor();
+                        Console.ReadLine();
+                        return;
+                    }
+                    if (selectedCarInputNum == 2)
+                    {
+                        Console.Clear();
+                        Console.WriteLine($"Choose wheel size : \n1.16 inch(standard)\n2.17 inch\n3.18 inch");
+                        string wheelSize = Console.ReadLine();
+                        bool wheelSizeParsed = int.TryParse(wheelSize, out int wheelSizeNum);
+                        if (!wheelSizeParsed || wheelSizeNum > 3 || wheelSizeNum < 1)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Wrong Input !!!");
+                            Console.ReadLine();
+                            continue;
+                        }
+                        if (wheelSizeNum == 2)
+                        {
+                            wheelSizeNum = 17;
+                            selectedCar.WheelSize = 17;
+                        }
+
+                        else if (wheelSizeNum == 3)
+                        {
+                            wheelSizeNum = 18;
+                            selectedCar.WheelSize = 18;
+                        }
+
+                        Console.Clear();
+                        Console.WriteLine($"Parking sensors\n1.Yes\n2.No");
+                        string parkingSensors = Console.ReadLine();
+                        bool parkingSensorParsed = int.TryParse(parkingSensors, out int parkingSensorNum);
+                        if (!parkingSensorParsed || parkingSensorNum > 2 || parkingSensorNum < 1)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Wrong input!!!");
+                            Console.ReadLine();
+                            continue;
+                        }
+                        if (parkingSensorNum == 1)
+                        {
+                            selectedCar.ParkingSensor = true;
+                        }
+
+                        Console.Clear();
+                        Console.WriteLine($"Navigation\n1.Yes\n2.No");
+                        string navigation = Console.ReadLine();
+                        bool navigationParsed = int.TryParse(navigation, out int navigationNumInput);
+                        if (!navigationParsed || navigationNumInput > 2 || navigationNumInput < 1)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Wrong input!!!");
+                            Console.ReadLine();
+                            continue;
+                        }
+                        if (navigationNumInput == 1)
+                        {
+                            selectedCar.Navigation = true;
+                        }
+
+                        Console.Clear();
+                        Console.WriteLine($"Lane Assistant\n1.Yes\n2.No");
+                        string laneAssistant = Console.ReadLine();
+                        bool laneAssistantParsed = int.TryParse(laneAssistant, out int laneAssistantNum);
+                        if (!laneAssistantParsed || laneAssistantNum > 2 || laneAssistantNum < 1)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Wrong input!!!");
+                            Console.ReadLine();
+                            continue;
+                        }
+                        if (laneAssistantNum == 1)
+                        {
+                            selectedCar.LaneAssistant = true;
+                        }
+
+                        Console.Clear();
+                        Console.WriteLine($"Adaptive Cruise Control\n1.Yes\n2.No");
+                        string cruiseControl = Console.ReadLine();
+                        bool cruiseControlParsed = int.TryParse(cruiseControl, out int cruiseControlNum);
+                        if (!cruiseControlParsed || cruiseControlNum > 2 || cruiseControlNum < 1)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Wrong input!!!");
+                            Console.ReadLine();
+                            continue;
+                        }
+                        if (cruiseControlNum == 1)
+                        {
+                            selectedCar.AdaptiveCruiseControl = true;
+                        }
+
+                        Console.Clear();
+                        Console.WriteLine($"Choose Engine : \n1.Petrol (standard)\n2.Diesel + 5%\n3.Hybrid + 15%\n4.Electric + 25%");
+                        string engineChoose = Console.ReadLine();
+                        bool engineChooseParse = int.TryParse(engineChoose, out int engineChooseNum);
+                        if (!engineChooseParse || engineChooseNum > 4 || engineChooseNum < 1)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Wrong input!!!");
+                            Console.ReadLine();
+                            continue;
+                        }
+                        if (engineChooseNum == 2)
+                        {
+                            selectedCar.EngineType = Enums.EngineEnum.Diesel;
+                        }
+                        else if (engineChooseNum == 3)
+                        {
+                            selectedCar.EngineType = Enums.EngineEnum.Hybrid;
+                        }
+                        else if (engineChooseNum == 4)
+                        {
+                            selectedCar.EngineType = Enums.EngineEnum.Electric;
+                        }
+
+                        Console.Clear();
+                        Console.WriteLine($"Choose transmission : \n1.Manual (standard)\n2.Automatic + 1000$\n3.SemiAutomatic + 1400$");
+                        string transmissionChoose = Console.ReadLine();
+                        bool transmissionChooseParse = int.TryParse(transmissionChoose, out int transmissionChooseNum);
+                        if (!transmissionChooseParse || transmissionChooseNum > 3 || transmissionChooseNum < 1)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Wrong input!!!");
+                            Console.ReadLine();
+                            continue;
+                        }
+                        if (transmissionChooseNum == 2)
+                        {
+                            selectedCar.Transmission = Enums.TransmissionEnum.Automatic;
+                        }
+                        else if (transmissionChooseNum == 3)
+                        {
+                            selectedCar.Transmission = Enums.TransmissionEnum.SemiAutomatic;
+                        }
+
+                        selectedCar.CalculatePrice();
+                        Console.Clear();
+                        Console.WriteLine(selectedCar.VehiclePurchaseInfo());
+                        Console.WriteLine("Order this vehicle?\n1.Yes\n2.No");
+                        string orderVehicle = Console.ReadLine();
+                        bool orderVehicleParsed = int.TryParse(orderVehicle, out int orderVehicleNum);
+                        if (!orderVehicleParsed || orderVehicleNum > 2 || orderVehicleNum < 1)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Wrong input!!!");
+                            Console.ReadLine();
+                            continue;
+                        }
+                        if (orderVehicleNum == 1)
+                        {
+                            Console.Clear();
+                            selectedCar.Status = Enums.VehicleStatusEnum.Reserved;
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine("Successfuly order vehicle");
+                            Console.WriteLine($"Vehicle Status : {selectedCar.Status}");
+                            Console.ResetColor();
+                            Console.ReadLine();
+                            return;
+                        }
+                    }
+                    if (selectedCarInputNum == 3)
+                    {
+                        return;
+                    }
+                }
+                else if (selectedVehicle.Type == "Truck")
+                {
+                    selectedTruck = (Truck)selectedVehicle;
+                    Console.Clear();
+                    Console.WriteLine(selectedTruck.VehicleInfo());
+                    Console.WriteLine($"1.Order this vehicle\n2.Add second trailer\n3.Return");
+                    string selectedTruckInput = Console.ReadLine();
+                    bool selectedTruckParse = int.TryParse(selectedTruckInput, out int selectedTruckMenuNum);
+                    if (!selectedTruckParse || selectedTruckMenuNum > 3 || selectedTruckMenuNum < 1)
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Wrong input!!");
+                        Console.ReadLine();
+                        continue;
+                    }
+                    if (selectedTruckMenuNum == 1)
+                    {
+                        Console.Clear();
+                        selectedTruck.Status = Enums.VehicleStatusEnum.Reserved;
+                        selectedTruck.BaseTruck();
+                        Console.WriteLine(selectedTruck.VehicleInfo());
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("Successfuly order vehicle");
+                        Console.WriteLine($"Vehicle Status : {selectedTruck.Status}");
+                        Console.ResetColor();
+                        Console.ReadLine();
+                        return;
+                    }
+                    else if (selectedTruckMenuNum == 2)
+                    {
+                        Console.Clear();
+                        selectedTruck.Trailers = 2;
+                        selectedTruck.SecondTrailer();
+                        selectedTruck.Status = Enums.VehicleStatusEnum.Reserved;
+                        Console.WriteLine(selectedTruck.VehicleInfo());
+                        Console.WriteLine("\nYou get 10% off for second trailer\n");
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("Successfuly order vehicle");
+                        Console.WriteLine($"Vehicle Status : {selectedTruck.Status}");
+                        Console.ResetColor();
+                        Console.ReadLine();
+                        return;
+                    }
+                    else if (selectedTruckMenuNum == 3) return;
+
+                }
+                else if (selectedVehicle.Type == "Van")
+                {
+                    selectedVan = (Van)selectedVehicle;
+                    Console.Clear();
+                    Console.WriteLine(selectedVan.VehicleInfo());
+                    Console.WriteLine($"1.Order this Vehicle (no extras for this vehicle)\n2.Return");
+                    string selecteVanClientInput = Console.ReadLine();
+                    bool clientInputVanParsed = int.TryParse(selecteVanClientInput, out int selectedVanInputNum);
+                    if (!clientInputVanParsed || selectedVanInputNum > 3 || selectedVanInputNum < 1)
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Wrong input!!!");
+                        Console.ReadLine();
+                        continue;
+                    }
+                    if (selectedVanInputNum == 1)
+                    {
+                        Console.Clear();
+                        selectedVan.Status = Enums.VehicleStatusEnum.Reserved;
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("Successfuly order vehicle");
+                        Console.WriteLine($"Vehicle Status : {selectedVan.Status}");
+                        Console.ResetColor();
+                        Console.ReadLine();
+                        return;
+                    }
+                    else if (selectedVanInputNum == 2) break;
+
+                }
             }
 
 
 
         }
+        static void SaleMenu(Sale salePerson)
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine($"1.View all vehicles\n2.View all reserved vehicles\n3.Logut");
+                string saleMenuInput = Console.ReadLine();
+                bool saleMenuParsed = int.TryParse(saleMenuInput, out int saleMenuInputNum);
+                if (!saleMenuParsed || saleMenuInputNum > 3 || saleMenuInputNum < 1)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Wrong input!!");
+                    Console.ReadLine();
+                    continue;
+                }
+                if (saleMenuInputNum == 1)
+                {
+                    Console.Clear();
+                    foreach (Vehicle vehicle in DbVehicles.Vehicles)
+                    {
+                        if (vehicle.Status == Enums.VehicleStatusEnum.Reserved)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine(vehicle.VehicleInfo());
+                            Console.ResetColor();
+                        }
+                        else
+                        {
+                            Console.WriteLine(vehicle.VehicleInfo());
+                        }
+                    }
+                    Console.WriteLine("Press any key to return to menu");
+                    Console.ReadLine();
+                    continue;
 
+                }
+                if (saleMenuInputNum == 2)
+                {
+                    Console.Clear();
+                    int counter = 0;
+                    foreach (Vehicle vehicle in DbVehicles.Vehicles)
+                    {
+                        if (vehicle.Status == Enums.VehicleStatusEnum.Reserved)
+                        {
+                            Console.WriteLine(vehicle.VehicleInfo());
+                            counter++;
+                        }
+                    }
+                    if (counter == 0)
+                    {
+                        Console.Clear();
+                        Console.WriteLine("There is no reserved vehicles\n");
+                        Console.WriteLine("Press any key to return to menu");
+                        Console.ReadLine();
+                        continue;
+                    }
+
+                    Console.WriteLine("1.Approve Order\n2.Reject Order\n3.Return");
+                    string saleOrderMenu = Console.ReadLine();
+                    bool saleOrderParsed = int.TryParse(saleOrderMenu, out int saleOrderMenuNumber);
+                    if (!saleOrderParsed || saleOrderMenuNumber > 3 || saleOrderMenuNumber < 1)
+                    {
+                        Console.WriteLine("Wrong input!!");
+                        Console.ReadLine();
+                        continue;
+                    }
+                    if (saleOrderMenuNumber == 1)
+                    {
+                        Console.Write("Enter vehicle id number to approve the order : ");
+                        string vehicleIdOrder = Console.ReadLine();
+                        bool vehicleIdNumOrder = int.TryParse(vehicleIdOrder, out int vehicleIdOrderNum);
+                        if (!vehicleIdNumOrder)
+                        {
+                            Console.WriteLine("Wrong input!!");
+                            Console.ReadLine();
+                            continue;
+                        }
+                        Vehicle selectedVehicle = DbVehicles.Vehicles.FirstOrDefault(x => x.Id == vehicleIdOrderNum);
+                        DbVehicles.Vehicles.Remove(selectedVehicle);
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("Purchase completed");
+                        Console.ResetColor();
+                        Console.ReadLine();
+                        break;
+                    }
+                    if (saleOrderMenuNumber == 2)
+                    {
+                        Console.Write("Enter vehicle ID :");
+                        string vehicleIdReject = Console.ReadLine();
+                        bool vehicleIdNumRejectParsed = int.TryParse(vehicleIdReject, out int vehicleIdRejectNum);
+                        if (!vehicleIdNumRejectParsed)
+                        {
+                            Console.WriteLine("Wrong input!!");
+                            Console.ReadLine();
+                            continue;
+                        }
+                        Vehicle selectedVehicle = DbVehicles.Vehicles.FirstOrDefault(x => x.Id == vehicleIdRejectNum);
+                        if (selectedVehicle == null)
+                        {
+                            Console.Clear();
+                            Console.WriteLine($"Vehicle with ID {vehicleIdReject} not found please try again");
+                            Console.ReadLine();
+                            break;
+                        }
+                        Console.WriteLine("Rejection message : ");
+                        string rejectMassage = Console.ReadLine();
+                        selectedVehicle.Status = Enums.VehicleStatusEnum.Available;
+
+                        Console.Clear();
+                        Console.WriteLine("Rejection completed");
+                        Console.ReadLine();
+                        break;
+                    }
+                    if (saleOrderMenuNumber == 3) break;
+                }
+                if (saleMenuInputNum == 3) break;
+
+                Console.ReadLine();
+            }
+
+        }
+        static void DealerMenu(Dealer dealer)
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine($"1.View all vehicles on stock\n2.Order new vehicles\n3.Logut");
+                string dealerMenuInput = Console.ReadLine();
+                bool dealerMenuParsed = int.TryParse(dealerMenuInput, out int dealerMenuInputNum);
+                if (!dealerMenuParsed || dealerMenuInputNum > 3 || dealerMenuInputNum < 1)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Wrong input!!");
+                    Console.ReadLine();
+                    continue;
+                }
+                if (dealerMenuInputNum == 1)
+                {
+                    Console.Clear();
+                    foreach (Vehicle vehicle in DbVehicles.Vehicles)
+                    {
+                        if (vehicle.Status == Enums.VehicleStatusEnum.Reserved)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine(vehicle.VehicleInfo());
+                            Console.ResetColor();
+                        }
+                        else
+                        {
+                            Console.WriteLine(vehicle.VehicleInfo());
+                        }
+                    }
+                    Console.WriteLine("Press any key to return to menu");
+                    Console.ReadLine();
+                    continue;
+                }
+                else if (dealerMenuInputNum == 2)
+                {
+                    Console.Clear();
+                    foreach (Vehicle vehicle in DbManufacturer.NewVehicles)
+                    {
+                        Console.WriteLine(vehicle.VehicleInfo());
+                    }
+                    Console.WriteLine("1.Order vehicle\n2.Return");
+                    string dealerOrder = Console.ReadLine();
+                    bool dealerOrderParsed = int.TryParse(dealerOrder, out int dealerOrderNum);
+                    if (!dealerMenuParsed || dealerMenuInputNum > 2 || dealerMenuInputNum < 1)
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Wrong input!!! Please try again");
+                        Console.ReadLine();
+                        continue;
+                    }
+                    if (dealerOrderNum == 1)
+                    {
+                        Console.Write("Enter vehicle ID to make an order : ");
+                        string orderNewVehicle = Console.ReadLine();
+                        bool orderVehicleParsed = int.TryParse(orderNewVehicle, out int orderNewVehicleNum);
+                        if (!orderVehicleParsed)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Wrong input!!! Please try again");
+                            Console.ReadLine();
+                            continue;
+                        }
+                        Vehicle newOrderdVehicle = DbManufacturer.NewVehicles.FirstOrDefault(x => x.Id == orderNewVehicleNum);
+                        if (newOrderdVehicle == null)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Vehicle ID not found \nPlease try again");
+                            Console.ReadLine();
+                            continue;
+                        }
+                        Console.Clear();
+                        DbVehicles.Vehicles.Add(newOrderdVehicle);
+
+                        DbManufacturer.NewVehicles.Remove(newOrderdVehicle);
+
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("Successfuly purchase vehicle");
+                        Console.ResetColor();
+                        Console.WriteLine("Press any key to return ");
+                        Console.ReadLine();
+                        break;
+                    }
+                    else if (dealerOrderNum == 2) break;
+
+                }
+                else if (dealerMenuInputNum == 3) break;
+            }
+        }
     }
 }
-
